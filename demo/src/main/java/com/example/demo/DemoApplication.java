@@ -3,12 +3,10 @@ package com.example.demo;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-//import java.net.URLEncoder;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.net.http.HttpResponse.BodyHandlers;
-//import java.nio.charset.StandardCharsets;
 import java.awt.Color;
 import java.awt.Desktop;
 import javax.swing.JButton;
@@ -16,7 +14,6 @@ import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JTextField;
-import org.json.JSONObject;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
@@ -99,11 +96,7 @@ public class DemoApplication {
 					}else{
 						try {
 						// URL que será aberta
-						JSONObject gameJson = new JSONObject();
-						gameJson.put("titulo", titulo.getText().replace(" ", "%20"));
-						gameJson.put("ano", ano.getText());
-						gameJson.put("classificacao", selectedOption2);
-						gameJson.put("genero", selectedOption.replace(" ", "%20"));
+						
 					
 						//String json_str = "{\"titulo\":\"Overwatch\",\"ano\":2016,\"genero\":\"Ficção\"\"classificacao\":\"12\"}";
 
@@ -234,9 +227,7 @@ public class DemoApplication {
 						AllStatus.setForeground(Color.black);
 					}else{
 						try{
-							JSONObject gameJson = new JSONObject();
-							gameJson.put("titulo", titulo.getText().replace(" ", "%20"));
-							gameJson.put("classificacao", selectedOption2);
+							
 							String json = String.format(
 								"{\"titulo\":\"%s\",\"classificacao\":%s}",
 								titulo.getText(),            // Overwatch

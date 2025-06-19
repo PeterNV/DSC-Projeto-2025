@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.beans.factory.annotation.Autowired;
 @RestController
 public class DeletarGameDaLista {
-     @Autowired
+    @Autowired
     private GamesRepo repository;
     public static String status;
 
