@@ -31,7 +31,7 @@ public class DemoApplication {
 		JButton confirmar = new JButton("CADASTRAR");
 		JButton verLista = new JButton("LISTA");
 		JButton deletar = new JButton("DELETAR");
-		JButton atualizar = new JButton("ATUALIZAR");
+		JButton atualizar = new JButton("ATUALIZAR CLASSIFICAÇÃO");
 		JButton buscar = new JButton("BUSCAR");
 		JTextField titulo = new JTextField("Título");
 		JTextField ano = new JTextField("Ano");
@@ -55,18 +55,18 @@ public class DemoApplication {
 		ListaDeGenerosDeGame.addItem("Violência");
 		ListaDeGenerosDeGame.addItem("Ficção");
 		ListaDeGenerosDeGame.addItem("Luta");
-		ano.setBounds(320, 25, 150, 25);
-		titulo.setBounds(320, 50, 150, 25);
-		classifca.setBounds(320, 75, 150, 25);
-		ListaDeGenerosDeGame.setBounds(320, 100, 150, 25);
-		confirmar.setBounds(320, 125, 150, 25);
+		ano.setBounds(320, 25, 200, 25);
+		titulo.setBounds(320, 50, 200, 25);
+		classifca.setBounds(320, 75, 200, 25);
+		ListaDeGenerosDeGame.setBounds(320, 100, 200, 25);
+		confirmar.setBounds(320, 125, 200, 25);
 		confirmar.setForeground(Color.white);
 		confirmar.setBackground(Color.green);
 
-		verLista.setBounds(320, 150, 150, 25);
-		deletar.setBounds(320, 175, 150, 25);
-		atualizar.setBounds(320, 200, 150, 25);
-		buscar.setBounds(320, 225, 150, 25);
+		verLista.setBounds(320, 150, 200, 25);
+		deletar.setBounds(320, 175, 200, 25);
+		atualizar.setBounds(320, 200, 200, 25);
+		buscar.setBounds(320, 225, 200, 25);
 		AllStatus.setBounds(320, 250, 225, 25);
 		deletar.setForeground(Color.white);
 		deletar.setBackground(Color.red);
