@@ -1,4 +1,4 @@
-package com.example.demo;
+package com.example.demo.model;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.mongodb.config.AbstractMongoClientConfiguration;

@@ -85,59 +85,59 @@ public class DemoApplication {
 
 		confirmar.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
-				if(selectedOption == null&&selectedOption2 == null){
+				if (selectedOption == null && selectedOption2 == null) {
 					AllStatus.setText("Campos não selecionados!");
 					AllStatus.setForeground(Color.black);
-					
-				}else{
-					if(ano.equals("Ano")&&titulo.equals("Título")){
+
+				} else {
+					if (ano.equals("Ano") && titulo.equals("Título")) {
 						AllStatus.setText("Por favor preencher os campos!");
 						AllStatus.setForeground(Color.black);
-					}else{
+					} else {
 						try {
-						// URL que será aberta
-						
-					
-						//String json_str = "{\"titulo\":\"Overwatch\",\"ano\":2016,\"genero\":\"Ficção\"\"classificacao\":\"12\"}";
+							// URL que será aberta
 
-						String json = String.format(
-						"{\"titulo\":\"%s\",\"ano\":%s,\"genero\":\"%s\",\"classificacao\":%s}",
-						titulo.getText(),            // Overwatch
-						ano.getText(),               // 2016
-						selectedOption,              // FPS
-						selectedOption2              // 12
-					);
+							// String json_str =
+							// "{\"titulo\":\"Overwatch\",\"ano\":2016,\"genero\":\"Ficção\"\"classificacao\":\"12\"}";
 
-					HttpClient client = HttpClient.newHttpClient();
-					HttpRequest request = HttpRequest.newBuilder()
-						.uri(URI.create("http://localhost:8000/cadastrar"))
-						.header("Content-Type", "application/json")
-						.POST(HttpRequest.BodyPublishers.ofString(json))
-						.build();
+							String json = String.format(
+									"{\"titulo\":\"%s\",\"ano\":%s,\"genero\":\"%s\",\"classificacao\":%s}",
+									titulo.getText(), // Overwatch
+									ano.getText(), // 2016
+									selectedOption, // FPS
+									selectedOption2 // 12
+							);
 
-					HttpResponse<String> resp = client.send(request, BodyHandlers.ofString());
-						
-					//System.out.println(resp.body());
-					if(resp.body() != null){
-						if(resp.body().startsWith("N")){
-							AllStatus.setText("Jogo já foi cadastrado.");
-							AllStatus.setForeground(Color.red);
+							HttpClient client = HttpClient.newHttpClient();
+							HttpRequest request = HttpRequest.newBuilder()
+									.uri(URI.create("http://localhost:8000/cadastrar"))
+									.header("Content-Type", "application/json")
+									.POST(HttpRequest.BodyPublishers.ofString(json))
+									.build();
+
+							HttpResponse<String> resp = client.send(request, BodyHandlers.ofString());
+
+							System.out.println(resp.body());
+							if (resp.body() != null) {
+								if (resp.body().startsWith("N")) {
+									AllStatus.setText("Jogo já foi cadastrado.");
+									AllStatus.setForeground(Color.red);
+								}
+								if (resp.body().startsWith("S")) {
+									AllStatus.setText("Cadastro realizado com sucesso.");
+									AllStatus.setForeground(Color.green);
+								}
+							}
+
+						} catch (Exception e) {
+							e.printStackTrace();
 						}
-						if(resp.body().startsWith("S")){
-							AllStatus.setText("Cadastro realizado com sucesso.");
-							AllStatus.setForeground(Color.green);
-						}
+						titulo.setText("Título");
+						ano.setText("Ano");
 					}
-					
-					} catch (Exception e) {
-						e.printStackTrace();
-					}
-					titulo.setText("Título");
-					ano.setText("Ano");
-					}
-					
+
 				}
-				
+
 			}
 		});
 		verLista.addActionListener(new java.awt.event.ActionListener() {
@@ -165,7 +165,7 @@ public class DemoApplication {
 
 				try {
 					// URL que será aberta
-					URI url = new URI("http://localhost:8000/buscar/"+titulo.getText().replace(" ", "%20"));
+					URI url = new URI("http://localhost:8000/buscar/" + titulo.getText().replace(" ", "%20"));
 
 					// Verifica se o Desktop é suportado no sistema
 					if (Desktop.isDesktopSupported()) {
@@ -190,26 +190,25 @@ public class DemoApplication {
 					System.out.println(url);
 					HttpClient client = HttpClient.newHttpClient();
 					HttpRequest request = HttpRequest.newBuilder()
-						.uri(URI.create("http://localhost:8000/deletar/"+titulo.getText().replace(" ", "%20")))
-						.header("Content-Type", "application/json")
-						.DELETE()
-						.build();
+							.uri(URI.create("http://localhost:8000/deletar/" + titulo.getText().replace(" ", "%20")))
+							.header("Content-Type", "application/json")
+							.DELETE()
+							.build();
 
 					HttpResponse<String> resp = client.send(request, BodyHandlers.ofString());
-						
-					//System.out.println(resp.body());
-					
-					if(resp.body() != null){
-						if(resp.body().startsWith("S")){
+
+					// System.out.println(resp.body());
+
+					if (resp.body() != null) {
+						if (resp.body().startsWith("S")) {
 							AllStatus.setText("Jogo deletado com sucesso!");
 							AllStatus.setForeground(Color.green);
 						}
-						if(resp.body().startsWith("N")){
+						if (resp.body().startsWith("N")) {
 							AllStatus.setText("Jogo não encontrado!");
 							AllStatus.setForeground(Color.red);
 						}
 					}
-						
 
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -220,48 +219,46 @@ public class DemoApplication {
 		atualizar.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
 
-			
-					// URL que será aberta
-					if(selectedOption2 == null){
-						AllStatus.setText("Classificação não selecionada!");
-						AllStatus.setForeground(Color.black);
-					}else{
-						try{
-							
-							String json = String.format(
+				// URL que será aberta
+				if (selectedOption2 == null) {
+					AllStatus.setText("Classificação não selecionada!");
+					AllStatus.setForeground(Color.black);
+				} else {
+					try {
+
+						String json = String.format(
 								"{\"titulo\":\"%s\",\"classificacao\":%s}",
-								titulo.getText(),            // Overwatch
-								selectedOption2         
-							);
-							//URI url = new URI("http://localhost:8000/deletar/" + titulo.getText().replace(" ", "%20"));
-							//System.out.println(url);
-							HttpClient client = HttpClient.newHttpClient();
-							HttpRequest request = HttpRequest.newBuilder()
+								titulo.getText(), // Overwatch
+								selectedOption2);
+						// URI url = new URI("http://localhost:8000/deletar/" +
+						// titulo.getText().replace(" ", "%20"));
+						// System.out.println(url);
+						HttpClient client = HttpClient.newHttpClient();
+						HttpRequest request = HttpRequest.newBuilder()
 								.uri(URI.create("http://localhost:8000/atualizar"))
 								.header("Content-Type", "application/json")
 								.PUT(HttpRequest.BodyPublishers.ofString(json))
 								.build();
 
-							HttpResponse<String> resp = client.send(request, BodyHandlers.ofString());
-								
-							System.out.println(resp.body());
-							
-							if(resp.body() != null){
-								if(resp.body().startsWith("S")){
-									AllStatus.setText("Jogo atualizado com sucesso!");
-									AllStatus.setForeground(Color.green);
-								}
-								if(resp.body().startsWith("N")){
-									AllStatus.setText("Jogo não encontrado!");
-									AllStatus.setForeground(Color.red);
-								}
-							}
-								
+						HttpResponse<String> resp = client.send(request, BodyHandlers.ofString());
 
-						} catch (Exception e) {
-							e.printStackTrace();
+						System.out.println(resp.body());
+
+						if (resp.body() != null) {
+							if (resp.body().startsWith("S")) {
+								AllStatus.setText("Jogo atualizado com sucesso!");
+								AllStatus.setForeground(Color.green);
+							}
+							if (resp.body().startsWith("N")) {
+								AllStatus.setText("Jogo não encontrado!");
+								AllStatus.setForeground(Color.red);
+							}
 						}
+
+					} catch (Exception e) {
+						e.printStackTrace();
 					}
+				}
 			}
 		});
 		painel.setLayout(null);
