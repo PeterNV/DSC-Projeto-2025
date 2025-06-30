@@ -70,14 +70,13 @@ public class GameControlador {
     }
 
     @GetMapping("/buscar/{titulo}")
-    public String RetornaGame(@PathVariable String titulo) {
+    public Games RetornaGame(@PathVariable String titulo) {
         Games game = repository.findByTitulo(titulo.toUpperCase());
 
         if (game != null) {
-            return game.getTitulo() + "<br>" + game.getAno() + "<br>" + game.getClassificacao() + "<br>"
-                    + game.getGenero();
+            return game;
         } else {
-            return "Jogo não encontrado.";
+            return null;
         }
     }
 

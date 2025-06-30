@@ -25,6 +25,7 @@ public class DemoApplication {
 	public static void main(String[] args) {
 
 		JFrame painel = new JFrame("GAMES");
+		//Campos para cadastro do jogo
 		JButton confirmar = new JButton("CADASTRAR");
 		JButton verLista = new JButton("LISTA");
 		JButton deletar = new JButton("DELETAR");
@@ -33,7 +34,6 @@ public class DemoApplication {
 		JTextField titulo = new JTextField("Título");
 		JTextField ano = new JTextField("Ano");
 		JLabel AllStatus = new JLabel("");
-		// JTextField classifca = new JTextField("Classificação");
 		JComboBox<String> classifca = new JComboBox<>();
 		classifca.addItem("LIVRE");
 		classifca.addItem("10");
@@ -59,7 +59,6 @@ public class DemoApplication {
 		confirmar.setBounds(320, 125, 200, 25);
 		confirmar.setForeground(Color.white);
 		confirmar.setBackground(Color.green);
-
 		verLista.setBounds(320, 150, 200, 25);
 		deletar.setBounds(320, 175, 200, 25);
 		atualizar.setBounds(320, 200, 200, 25);
@@ -73,6 +72,24 @@ public class DemoApplication {
 		verLista.setBackground(Color.gray);
 		buscar.setForeground(Color.white);
 		buscar.setBackground(Color.orange);
+		//Campos para cadastro do usuário
+		JTextField nome = new JTextField("Nome");
+		JTextField email = new JTextField("Email");
+		JTextField senha = new JTextField("Senha");
+		JButton confirmarUser = new JButton("CADASTRAR");
+		JButton atualizarSenha = new JButton("ATUALIZAR SENHA");
+		JLabel AllStatusDois = new JLabel("");
+		nome.setBounds(640, 25, 200, 25);
+		email.setBounds(640, 50, 200, 25);
+		senha.setBounds(640, 75, 200, 25);
+		confirmarUser.setBounds(640, 100, 200, 25);
+		atualizarSenha.setBounds(640, 125, 200, 25);
+		AllStatusDois.setBounds(640, 150, 200, 25);
+		confirmarUser.setForeground(Color.white);
+		confirmarUser.setBackground(Color.green);
+		atualizarSenha.setForeground(Color.white);
+		atualizarSenha.setBackground(Color.blue);
+
 		ListaDeGenerosDeGame.addActionListener(e -> {
 			selectedOption = (String) ListaDeGenerosDeGame.getSelectedItem();
 			System.out.println("Selected: " + selectedOption);
@@ -81,7 +98,7 @@ public class DemoApplication {
 			selectedOption2 = (String) classifca.getSelectedItem();
 			System.out.println("Selected: " + selectedOption2);
 		});
-		painel.setSize(640, 640);
+		painel.setSize(1280, 1280);
 
 		confirmar.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -140,6 +157,57 @@ public class DemoApplication {
 
 			}
 		});
+
+		confirmarUser.addActionListener(new java.awt.event.ActionListener() {
+			public void actionPerformed(java.awt.event.ActionEvent evt) {
+				
+					if (nome.equals("Nome") && senha.equals("Senha") && email.equals("Email")) {
+						AllStatus.setText("Por favor preencher os campos!");
+						AllStatus.setForeground(Color.black);
+					} else {
+						try {
+							
+
+							String json = String.format(
+									"{\"nome\":\"%s\",\"email\":\"%s\",\"senha\":\"%s\"}"
+,
+									nome.getText(), 
+									email.getText().toString(), 
+									senha.getText()
+							);
+
+							HttpClient client = HttpClient.newHttpClient();
+							HttpRequest request = HttpRequest.newBuilder()
+									.uri(URI.create("http://localhost:8000/cadastrarUser"))
+									.header("Content-Type", "application/json")
+									.POST(HttpRequest.BodyPublishers.ofString(json))
+									.build();
+
+							HttpResponse<String> resp = client.send(request, BodyHandlers.ofString());
+
+							System.out.println(resp.body());
+							if (resp.body() != null) {
+								if (resp.body().startsWith("N")) {
+									AllStatusDois.setText("Usuário já foi cadastrado!");
+									AllStatusDois.setForeground(Color.red);
+								}
+								if (resp.body().startsWith("S")) {
+									AllStatusDois.setText("Usuário cadastrado com sucesso!!");
+									AllStatusDois.setForeground(Color.green);
+								}
+							}
+
+						} catch (Exception e) {
+							e.printStackTrace();
+						}
+						email.setText("Email");
+						nome.setText("Nome");
+						senha.setText("Senha");
+					}
+
+			}
+		});
+
 		verLista.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
 
@@ -261,6 +329,49 @@ public class DemoApplication {
 				}
 			}
 		});
+		atualizarSenha.addActionListener(new java.awt.event.ActionListener() {
+			public void actionPerformed(java.awt.event.ActionEvent evt) {
+
+				// URL que será aberta
+				if (senha.getText().equals("Senha")) {
+					AllStatusDois.setText("Senha não permitida.");
+					AllStatusDois.setForeground(Color.black);
+				} else {
+					try {
+
+						String json = String.format(
+								"{\"email\":\"%s\",\"senha\":\"%s\"}",
+								email.getText(), 
+								senha.getText());
+						
+						HttpClient client = HttpClient.newHttpClient();
+						HttpRequest request = HttpRequest.newBuilder()
+								.uri(URI.create("http://localhost:8000/atualizarUser"))
+								.header("Content-Type", "application/json")
+								.PUT(HttpRequest.BodyPublishers.ofString(json))
+								.build();
+
+						HttpResponse<String> resp = client.send(request, BodyHandlers.ofString());
+
+						System.out.println(resp.body());
+
+						if (resp.body() != null) {
+							if (resp.body().startsWith("S")) {
+								AllStatusDois.setText("Senha atualizada com sucesso!");
+								AllStatusDois.setForeground(Color.green);
+							}
+							if (resp.body().startsWith("N")) {
+								AllStatusDois.setText("Usuário não encontrado!");
+								AllStatusDois.setForeground(Color.red);
+							}
+						}
+
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+				}
+			}
+		});
 		painel.setLayout(null);
 		painel.setVisible(true);
 		painel.add(confirmar);
@@ -273,6 +384,13 @@ public class DemoApplication {
 		painel.add(AllStatus);
 		painel.add(atualizar);
 		painel.add(buscar);
+		painel.add(nome);
+		painel.add(email);
+		painel.add(senha);
+		painel.add(confirmarUser);
+		painel.add(atualizarSenha);
+		painel.add(AllStatusDois);
+		
 		SpringApplication.run(DemoApplication.class, args);
 
 	}
