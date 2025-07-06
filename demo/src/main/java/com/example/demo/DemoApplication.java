@@ -13,6 +13,7 @@ import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JTextField;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -162,9 +163,20 @@ public class DemoApplication {
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
 				
 					if (nome.equals("Nome") && senha.equals("Senha") && email.equals("Email")) {
-						AllStatus.setText("Por favor preencher os campos!");
-						AllStatus.setForeground(Color.black);
-					} else {
+					
+						AllStatusDois.setText("Por favor preencher os campos!");
+						AllStatusDois.setForeground(Color.black);
+					}else if(!email.getText().contains("@") || !email.getText().contains(".")){
+						AllStatusDois.setText("Email inválido!");
+    					AllStatusDois.setForeground(Color.red);
+					}else if(!senha.getText().matches("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).{8,}$")){
+						AllStatusDois.setText("Senha inválida!");
+    					AllStatusDois.setForeground(Color.red);
+						JOptionPane.showMessageDialog(null,
+						"A senha deve conter pelo menos 8 caracteres, incluindo letras maiúsculas, minúsculas e números.",
+						"Senha inválida",
+						JOptionPane.WARNING_MESSAGE);
+					}else {
 						try {
 							
 
