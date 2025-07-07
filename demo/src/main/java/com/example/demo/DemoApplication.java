@@ -26,7 +26,7 @@ public class DemoApplication {
 	public static void main(String[] args) {
 
 		JFrame painel = new JFrame("GAMES");
-		//Campos para cadastro do jogo
+		// Campos para cadastro do jogo
 		JButton confirmar = new JButton("CADASTRAR");
 		JButton verLista = new JButton("LISTA");
 		JButton deletar = new JButton("DELETAR");
@@ -73,7 +73,7 @@ public class DemoApplication {
 		verLista.setBackground(Color.gray);
 		buscar.setForeground(Color.white);
 		buscar.setBackground(Color.orange);
-		//Campos para cadastro do usuário
+		// Campos para cadastro do usuário
 		JTextField nome = new JTextField("Nome");
 		JTextField email = new JTextField("Email");
 		JTextField senha = new JTextField("Senha");
@@ -111,6 +111,11 @@ public class DemoApplication {
 					if (ano.equals("Ano") && titulo.equals("Título")) {
 						AllStatus.setText("Por favor preencher os campos!");
 						AllStatus.setForeground(Color.black);
+
+					} else if ((Integer.parseInt(ano.getText().toString()) < 1958
+							|| Integer.parseInt(ano.getText().toString()) > 2025)) {
+						AllStatus.setText("Ano invalido!");
+						AllStatus.setForeground(Color.red);
 					} else {
 						try {
 							// URL que será aberta
@@ -161,61 +166,58 @@ public class DemoApplication {
 
 		confirmarUser.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
-				
-					if (nome.equals("Nome") && senha.equals("Senha") && email.equals("Email")) {
-					
-						AllStatusDois.setText("Por favor preencher os campos!");
-						AllStatusDois.setForeground(Color.black);
-					}else if(!email.getText().contains("@") || !email.getText().contains(".")){
-						AllStatusDois.setText("Email inválido!");
-    					AllStatusDois.setForeground(Color.red);
-					}else if(!senha.getText().matches("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).{8,}$")){
-						AllStatusDois.setText("Senha inválida!");
-    					AllStatusDois.setForeground(Color.red);
-						JOptionPane.showMessageDialog(null,
-						"A senha deve conter pelo menos 8 caracteres, incluindo letras maiúsculas, minúsculas e números.",
-						"Senha inválida",
-						JOptionPane.WARNING_MESSAGE);
-					}else {
-						try {
-							
 
-							String json = String.format(
-									"{\"nome\":\"%s\",\"email\":\"%s\",\"senha\":\"%s\"}"
-,
-									nome.getText(), 
-									email.getText().toString(), 
-									senha.getText()
-							);
+				if (nome.equals("Nome") && senha.equals("Senha") && email.equals("Email")) {
 
-							HttpClient client = HttpClient.newHttpClient();
-							HttpRequest request = HttpRequest.newBuilder()
-									.uri(URI.create("http://localhost:8000/cadastrarUser"))
-									.header("Content-Type", "application/json")
-									.POST(HttpRequest.BodyPublishers.ofString(json))
-									.build();
+					AllStatusDois.setText("Por favor preencher os campos!");
+					AllStatusDois.setForeground(Color.black);
+				} else if (!email.getText().contains("@") || !email.getText().contains(".")) {
+					AllStatusDois.setText("Email inválido!");
+					AllStatusDois.setForeground(Color.red);
+				} else if (!senha.getText().matches("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).{8,}$")) {
+					AllStatusDois.setText("Senha inválida!");
+					AllStatusDois.setForeground(Color.red);
+					JOptionPane.showMessageDialog(null,
+							"A senha deve conter pelo menos 8 caracteres, incluindo letras maiúsculas, minúsculas e números.",
+							"Senha inválida",
+							JOptionPane.WARNING_MESSAGE);
+				} else {
+					try {
 
-							HttpResponse<String> resp = client.send(request, BodyHandlers.ofString());
+						String json = String.format(
+								"{\"nome\":\"%s\",\"email\":\"%s\",\"senha\":\"%s\"}",
+								nome.getText(),
+								email.getText().toString(),
+								senha.getText());
 
-							System.out.println(resp.body());
-							if (resp.body() != null) {
-								if (resp.body().startsWith("N")) {
-									AllStatusDois.setText("Usuário já foi cadastrado!");
-									AllStatusDois.setForeground(Color.red);
-								}
-								if (resp.body().startsWith("S")) {
-									AllStatusDois.setText("Usuário cadastrado com sucesso!!");
-									AllStatusDois.setForeground(Color.green);
-								}
+						HttpClient client = HttpClient.newHttpClient();
+						HttpRequest request = HttpRequest.newBuilder()
+								.uri(URI.create("http://localhost:8000/cadastrarUser"))
+								.header("Content-Type", "application/json")
+								.POST(HttpRequest.BodyPublishers.ofString(json))
+								.build();
+
+						HttpResponse<String> resp = client.send(request, BodyHandlers.ofString());
+
+						System.out.println(resp.body());
+						if (resp.body() != null) {
+							if (resp.body().startsWith("N")) {
+								AllStatusDois.setText("Usuário já foi cadastrado!");
+								AllStatusDois.setForeground(Color.red);
 							}
-
-						} catch (Exception e) {
-							e.printStackTrace();
+							if (resp.body().startsWith("S")) {
+								AllStatusDois.setText("Usuário cadastrado com sucesso!!");
+								AllStatusDois.setForeground(Color.green);
+							}
 						}
-						email.setText("Email");
-						nome.setText("Nome");
-						senha.setText("Senha");
+
+					} catch (Exception e) {
+						e.printStackTrace();
 					}
+					email.setText("Email");
+					nome.setText("Nome");
+					senha.setText("Senha");
+				}
 
 			}
 		});
@@ -348,14 +350,21 @@ public class DemoApplication {
 				if (senha.getText().equals("Senha")) {
 					AllStatusDois.setText("Senha não permitida.");
 					AllStatusDois.setForeground(Color.black);
+				} else if (!senha.getText().matches("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).{8,}$")) {
+					AllStatusDois.setText("Senha inválida!");
+					AllStatusDois.setForeground(Color.red);
+					JOptionPane.showMessageDialog(null,
+							"A senha deve conter pelo menos 8 caracteres, incluindo letras maiúsculas, minúsculas e números.",
+							"Senha inválida",
+							JOptionPane.WARNING_MESSAGE);
 				} else {
 					try {
 
 						String json = String.format(
 								"{\"email\":\"%s\",\"senha\":\"%s\"}",
-								email.getText(), 
+								email.getText(),
 								senha.getText());
-						
+
 						HttpClient client = HttpClient.newHttpClient();
 						HttpRequest request = HttpRequest.newBuilder()
 								.uri(URI.create("http://localhost:8000/atualizarUser"))
@@ -402,7 +411,7 @@ public class DemoApplication {
 		painel.add(confirmarUser);
 		painel.add(atualizarSenha);
 		painel.add(AllStatusDois);
-		
+
 		SpringApplication.run(DemoApplication.class, args);
 
 	}
