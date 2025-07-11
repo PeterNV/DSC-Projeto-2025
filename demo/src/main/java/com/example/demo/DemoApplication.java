@@ -24,8 +24,9 @@ public class DemoApplication {
 	public static String selectedOption2;
 
 	public static void main(String[] args) {
-
+		//SpringApplication.run(DemoApplication.class, args);
 		JFrame painel = new JFrame("GAMES");
+		JFrame login = new JFrame("LOGIN E CADASTRO");
 		// Campos para cadastro do jogo
 		JButton confirmar = new JButton("CADASTRAR");
 		JButton verLista = new JButton("LISTA");
@@ -35,6 +36,7 @@ public class DemoApplication {
 		JTextField titulo = new JTextField("Título");
 		JTextField ano = new JTextField("Ano");
 		JLabel AllStatus = new JLabel("");
+		JLabel AllStatusTres = new JLabel("");
 		JComboBox<String> classifca = new JComboBox<>();
 		classifca.addItem("LIVRE");
 		classifca.addItem("10");
@@ -77,6 +79,16 @@ public class DemoApplication {
 		JTextField nome = new JTextField("Nome");
 		JTextField email = new JTextField("Email");
 		JTextField senha = new JTextField("Senha");
+		JTextField emailLogin = new JTextField("Email");
+		JTextField senhaLogin = new JTextField("Senha");
+		JButton confirmarLogin = new JButton("CONFIRMAR");
+		emailLogin.setBounds(320, 25, 200, 25);
+		senhaLogin.setBounds(320, 50, 200, 25);
+		confirmarLogin.setBounds(320, 75, 200, 25);
+		AllStatusTres.setBounds(320, 100, 200, 25);
+		confirmarLogin.setForeground(Color.white);
+		confirmarLogin.setBackground(Color.green);
+		
 		JButton confirmarUser = new JButton("CADASTRAR");
 		JButton atualizarSenha = new JButton("ATUALIZAR SENHA");
 		JLabel AllStatusDois = new JLabel("");
@@ -90,25 +102,98 @@ public class DemoApplication {
 		confirmarUser.setBackground(Color.green);
 		atualizarSenha.setForeground(Color.white);
 		atualizarSenha.setBackground(Color.blue);
-
+		login.setVisible(true);
+		login.setLayout(null);
+		login.add(emailLogin);
+		login.add(senhaLogin);
+		login.add(AllStatusTres);
+		login.add(confirmarLogin);
+		login.add(nome);
+		login.add(email);
+		login.add(senha);
+		login.add(confirmarUser);
+		login.add(atualizarSenha);
+		login.add(AllStatusDois);
 		ListaDeGenerosDeGame.addActionListener(e -> {
 			selectedOption = (String) ListaDeGenerosDeGame.getSelectedItem();
 			System.out.println("Selected: " + selectedOption);
 		});
+
 		classifca.addActionListener(e -> {
 			selectedOption2 = (String) classifca.getSelectedItem();
 			System.out.println("Selected: " + selectedOption2);
 		});
-		painel.setSize(1280, 1280);
 
+		painel.setSize(1280, 1280);
+		login.setSize(1280, 1280);
+		confirmarLogin.addActionListener(new java.awt.event.ActionListener() {
+			public void actionPerformed(java.awt.event.ActionEvent evt) {
+
+				if (emailLogin.getText().equals("Email") && senhaLogin.getText().equals("Senha")) {
+					AllStatusTres.setText("Dados invalidos.");
+				} else {
+					try {
+
+						String json = String.format(
+								"{\"email\":\"%s\",\"senha\":\"%s\"}",
+								emailLogin.getText(),
+								senhaLogin.getText().toString());
+
+						HttpClient client = HttpClient.newHttpClient();
+						HttpRequest request = HttpRequest.newBuilder()
+								.uri(URI.create("http://localhost:8000/auth/generateToken"))
+								.header("Content-Type", "application/json")
+								.POST(HttpRequest.BodyPublishers.ofString(json))
+								.build();
+
+						HttpResponse<String> resp = client.send(request, BodyHandlers.ofString());
+
+						System.out.println(resp.body());
+						if (resp.body() != null) {
+							/* 
+							if (resp.body().startsWith("N")) {
+								AllStatusTres.setText("Usuário não encontrado!");
+								AllStatusTres.setForeground(Color.red);
+							}
+								*/
+							if (resp.body().startsWith("S")) {
+
+								login.dispose();
+								painel.setLayout(null);
+								painel.setVisible(true);
+								painel.add(confirmar);
+								painel.add(ano);
+								painel.add(titulo);
+								painel.add(classifca);
+								painel.add(ListaDeGenerosDeGame);
+								painel.add(verLista);
+								painel.add(deletar);
+								painel.add(AllStatus);
+								painel.add(atualizar);
+								painel.add(buscar);
+								
+							}else{
+								AllStatusTres.setText("Usuário não encontrado!");
+								AllStatusTres.setForeground(Color.red);
+							}
+						}
+
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+
+				}
+
+			}
+		});
 		confirmar.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
-				if (selectedOption == null && selectedOption2 == null) {
+				if (selectedOption == null || selectedOption2 == null) {
 					AllStatus.setText("Campos não selecionados!");
 					AllStatus.setForeground(Color.black);
 
 				} else {
-					if (ano.equals("Ano") && titulo.equals("Título")) {
+					if (ano.getText().equals("Ano") || titulo.getText().equals("Título")) {
 						AllStatus.setText("Por favor preencher os campos!");
 						AllStatus.setForeground(Color.black);
 
@@ -120,20 +205,18 @@ public class DemoApplication {
 						try {
 							// URL que será aberta
 
-							// String json_str =
-							// "{\"titulo\":\"Overwatch\",\"ano\":2016,\"genero\":\"Ficção\"\"classificacao\":\"12\"}";
 
 							String json = String.format(
 									"{\"titulo\":\"%s\",\"ano\":%s,\"genero\":\"%s\",\"classificacao\":%s}",
-									titulo.getText(), // Overwatch
-									ano.getText(), // 2016
-									selectedOption, // FPS
-									selectedOption2 // 12
+									titulo.getText(), 
+									ano.getText(), 
+									selectedOption, 
+									selectedOption2 
 							);
 
 							HttpClient client = HttpClient.newHttpClient();
 							HttpRequest request = HttpRequest.newBuilder()
-									.uri(URI.create("http://localhost:8000/cadastrar"))
+									.uri(URI.create("http://localhost:8000/auth/cadastrar"))
 									.header("Content-Type", "application/json")
 									.POST(HttpRequest.BodyPublishers.ofString(json))
 									.build();
@@ -167,7 +250,7 @@ public class DemoApplication {
 		confirmarUser.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
 
-				if (nome.equals("Nome") && senha.equals("Senha") && email.equals("Email")) {
+				if (nome.getText().equals("Nome") || senha.getText().equals("Senha") || email.getText().equals("Email")) {
 
 					AllStatusDois.setText("Por favor preencher os campos!");
 					AllStatusDois.setForeground(Color.black);
@@ -192,7 +275,7 @@ public class DemoApplication {
 
 						HttpClient client = HttpClient.newHttpClient();
 						HttpRequest request = HttpRequest.newBuilder()
-								.uri(URI.create("http://localhost:8000/cadastrarUser"))
+								.uri(URI.create("http://localhost:8000/auth/cadastrarUser"))
 								.header("Content-Type", "application/json")
 								.POST(HttpRequest.BodyPublishers.ofString(json))
 								.build();
@@ -227,7 +310,7 @@ public class DemoApplication {
 
 				try {
 					// URL que será aberta
-					URI url = new URI("http://localhost:8000/VerGame");
+					URI url = new URI("http://localhost:8000/auth/VerGame");
 
 					// Verifica se o Desktop é suportado no sistema
 					if (Desktop.isDesktopSupported()) {
@@ -247,7 +330,7 @@ public class DemoApplication {
 
 				try {
 					// URL que será aberta
-					URI url = new URI("http://localhost:8000/buscar/" + titulo.getText().replace(" ", "%20"));
+					URI url = new URI("http://localhost:8000/auth/buscar/" + titulo.getText().replace(" ", "%20"));
 
 					// Verifica se o Desktop é suportado no sistema
 					if (Desktop.isDesktopSupported()) {
@@ -268,11 +351,11 @@ public class DemoApplication {
 				try {
 					// URL que será aberta
 
-					URI url = new URI("http://localhost:8000/deletar/" + titulo.getText().replace(" ", "%20"));
+					URI url = new URI("http://localhost:8000/auth/deletar/" + titulo.getText().replace(" ", "%20"));
 					System.out.println(url);
 					HttpClient client = HttpClient.newHttpClient();
 					HttpRequest request = HttpRequest.newBuilder()
-							.uri(URI.create("http://localhost:8000/deletar/" + titulo.getText().replace(" ", "%20")))
+							.uri(URI.create("http://localhost:8000/auth/deletar/" + titulo.getText().replace(" ", "%20")))
 							.header("Content-Type", "application/json")
 							.DELETE()
 							.build();
@@ -317,7 +400,7 @@ public class DemoApplication {
 						// System.out.println(url);
 						HttpClient client = HttpClient.newHttpClient();
 						HttpRequest request = HttpRequest.newBuilder()
-								.uri(URI.create("http://localhost:8000/atualizar"))
+								.uri(URI.create("http://localhost:8000/auth/atualizar"))
 								.header("Content-Type", "application/json")
 								.PUT(HttpRequest.BodyPublishers.ofString(json))
 								.build();
@@ -367,7 +450,7 @@ public class DemoApplication {
 
 						HttpClient client = HttpClient.newHttpClient();
 						HttpRequest request = HttpRequest.newBuilder()
-								.uri(URI.create("http://localhost:8000/atualizarUser"))
+								.uri(URI.create("http://localhost:8000/auth/atualizarUser"))
 								.header("Content-Type", "application/json")
 								.PUT(HttpRequest.BodyPublishers.ofString(json))
 								.build();
@@ -393,24 +476,6 @@ public class DemoApplication {
 				}
 			}
 		});
-		painel.setLayout(null);
-		painel.setVisible(true);
-		painel.add(confirmar);
-		painel.add(ano);
-		painel.add(titulo);
-		painel.add(classifca);
-		painel.add(ListaDeGenerosDeGame);
-		painel.add(verLista);
-		painel.add(deletar);
-		painel.add(AllStatus);
-		painel.add(atualizar);
-		painel.add(buscar);
-		painel.add(nome);
-		painel.add(email);
-		painel.add(senha);
-		painel.add(confirmarUser);
-		painel.add(atualizarSenha);
-		painel.add(AllStatusDois);
 
 		SpringApplication.run(DemoApplication.class, args);
 
