@@ -17,7 +17,7 @@ public class UserInfoService implements UserDetailsService {
     private PasswordEncoder encoder;
 
     public String addUser(UserInfo userInfo) {
-
+        // z
         userInfo.setSenha(encoder.encode(userInfo.getSenha()));
         repository.save(userInfo);
         return "Usuário cadastrado com sucesso";
@@ -27,10 +27,10 @@ public class UserInfoService implements UserDetailsService {
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         UserInfo user = repository.findByEmail(email);
         if (user == null) {
-            
+
             System.out.println("Usuário não encontrado");
             throw new UsernameNotFoundException("Usuário não encontrado");
-            
+
         }
         return new org.springframework.security.core.userdetails.User(
                 user.getEmail(),

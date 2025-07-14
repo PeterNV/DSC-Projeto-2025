@@ -24,7 +24,7 @@ public class DemoApplication {
 	public static String selectedOption2;
 
 	public static void main(String[] args) {
-		//SpringApplication.run(DemoApplication.class, args);
+		// SpringApplication.run(DemoApplication.class, args);
 		JFrame painel = new JFrame("GAMES");
 		JFrame login = new JFrame("LOGIN E CADASTRO");
 		// Campos para cadastro do jogo
@@ -33,6 +33,7 @@ public class DemoApplication {
 		JButton deletar = new JButton("DELETAR");
 		JButton atualizar = new JButton("ATUALIZAR CLASSIFICAÇÃO");
 		JButton buscar = new JButton("BUSCAR");
+		JButton logout = new JButton("LOGOUT");
 		JTextField titulo = new JTextField("Título");
 		JTextField ano = new JTextField("Ano");
 		JLabel AllStatus = new JLabel("");
@@ -66,7 +67,10 @@ public class DemoApplication {
 		deletar.setBounds(320, 175, 200, 25);
 		atualizar.setBounds(320, 200, 200, 25);
 		buscar.setBounds(320, 225, 200, 25);
-		AllStatus.setBounds(320, 250, 225, 25);
+		logout.setBounds(320, 250, 200, 25);
+		AllStatus.setBounds(320, 275, 225, 25);
+		logout.setForeground(Color.white);
+		logout.setBackground(Color.red);
 		deletar.setForeground(Color.white);
 		deletar.setBackground(Color.red);
 		atualizar.setForeground(Color.white);
@@ -88,7 +92,7 @@ public class DemoApplication {
 		AllStatusTres.setBounds(320, 100, 200, 25);
 		confirmarLogin.setForeground(Color.white);
 		confirmarLogin.setBackground(Color.green);
-		
+
 		JButton confirmarUser = new JButton("CADASTRAR");
 		JButton atualizarSenha = new JButton("ATUALIZAR SENHA");
 		JLabel AllStatusDois = new JLabel("");
@@ -123,7 +127,7 @@ public class DemoApplication {
 			selectedOption2 = (String) classifca.getSelectedItem();
 			System.out.println("Selected: " + selectedOption2);
 		});
-
+		// X
 		painel.setSize(1280, 1280);
 		login.setSize(1280, 1280);
 		confirmarLogin.addActionListener(new java.awt.event.ActionListener() {
@@ -149,13 +153,14 @@ public class DemoApplication {
 						HttpResponse<String> resp = client.send(request, BodyHandlers.ofString());
 
 						System.out.println(resp.body());
-						if (resp.body() != null) {
-							/* 
-							if (resp.body().startsWith("N")) {
-								AllStatusTres.setText("Usuário não encontrado!");
-								AllStatusTres.setForeground(Color.red);
-							}
-								*/
+						System.out.println(resp.statusCode());
+						if (resp.statusCode() == 200) {
+							/*
+							 * if (resp.body() != null) {
+							 * AllStatusTres.setText("Usuário não encontrado!");
+							 * AllStatusTres.setForeground(Color.red);
+							 * }
+							 */
 							if (resp.body().startsWith("S")) {
 
 								login.dispose();
@@ -171,19 +176,62 @@ public class DemoApplication {
 								painel.add(AllStatus);
 								painel.add(atualizar);
 								painel.add(buscar);
-								
-							}else{
+								painel.add(logout);
+
+							} else {
 								AllStatusTres.setText("Usuário não encontrado!");
 								AllStatusTres.setForeground(Color.red);
 							}
+						} else {
+							AllStatusTres.setText("Usuário não encontrado!");
+							AllStatusTres.setForeground(Color.red);
 						}
 
 					} catch (Exception e) {
+
 						e.printStackTrace();
 					}
 
 				}
 
+			}
+		});
+		logout.addActionListener(new java.awt.event.ActionListener() {
+			public void actionPerformed(java.awt.event.ActionEvent evt) {
+				try{
+					String json = String.format(
+								"{\"email\":\"%s\",\"senha\":\"%s\"}",
+								emailLogin.getText(),
+								senhaLogin.getText().toString());
+
+						HttpClient client = HttpClient.newHttpClient();
+						HttpRequest request = HttpRequest.newBuilder()
+								.uri(URI.create("http://localhost:8000/auth/logout"))
+								.header("Content-Type", "application/json")
+								.POST(HttpRequest.BodyPublishers.ofString(json))
+								.build();
+
+						HttpResponse<String> resp = client.send(request, BodyHandlers.ofString());
+
+						System.out.println(resp.body());
+						System.out.println(resp.statusCode());
+						painel.dispose();
+						login.setVisible(true);
+						login.setLayout(null);
+						login.add(emailLogin);
+						login.add(senhaLogin);
+						login.add(AllStatusTres);
+						login.add(confirmarLogin);
+						login.add(nome);
+						login.add(email);
+						login.add(senha);
+						login.add(confirmarUser);
+						login.add(atualizarSenha);
+						login.add(AllStatusDois);
+				}catch (Exception e){
+					e.printStackTrace();
+				}
+				
 			}
 		});
 		confirmar.addActionListener(new java.awt.event.ActionListener() {
@@ -205,14 +253,12 @@ public class DemoApplication {
 						try {
 							// URL que será aberta
 
-
 							String json = String.format(
 									"{\"titulo\":\"%s\",\"ano\":%s,\"genero\":\"%s\",\"classificacao\":%s}",
-									titulo.getText(), 
-									ano.getText(), 
-									selectedOption, 
-									selectedOption2 
-							);
+									titulo.getText(),
+									ano.getText(),
+									selectedOption,
+									selectedOption2);
 
 							HttpClient client = HttpClient.newHttpClient();
 							HttpRequest request = HttpRequest.newBuilder()
@@ -250,7 +296,8 @@ public class DemoApplication {
 		confirmarUser.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
 
-				if (nome.getText().equals("Nome") || senha.getText().equals("Senha") || email.getText().equals("Email")) {
+				if (nome.getText().equals("Nome") || senha.getText().equals("Senha")
+						|| email.getText().equals("Email")) {
 
 					AllStatusDois.setText("Por favor preencher os campos!");
 					AllStatusDois.setForeground(Color.black);
@@ -355,7 +402,8 @@ public class DemoApplication {
 					System.out.println(url);
 					HttpClient client = HttpClient.newHttpClient();
 					HttpRequest request = HttpRequest.newBuilder()
-							.uri(URI.create("http://localhost:8000/auth/deletar/" + titulo.getText().replace(" ", "%20")))
+							.uri(URI.create(
+									"http://localhost:8000/auth/deletar/" + titulo.getText().replace(" ", "%20")))
 							.header("Content-Type", "application/json")
 							.DELETE()
 							.build();
