@@ -17,12 +17,12 @@ public class UserInfoService implements UserDetailsService {
     private PasswordEncoder encoder;
 
     public String addUser(UserInfo userInfo) {
-        // z
+
         userInfo.setSenha(encoder.encode(userInfo.getSenha()));
         repository.save(userInfo);
-        return "Usuário cadastrado com sucesso";
+        return "Usuário cadastrado com sucessoasdsad";
     }
-
+//x
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         UserInfo user = repository.findByEmail(email);

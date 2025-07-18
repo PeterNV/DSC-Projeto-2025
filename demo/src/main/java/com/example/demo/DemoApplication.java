@@ -7,6 +7,7 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.net.http.HttpResponse.BodyHandlers;
+import java.util.Map;
 import java.awt.Color;
 import java.awt.Desktop;
 import javax.swing.JButton;
@@ -17,6 +18,8 @@ import javax.swing.JOptionPane;
 import javax.swing.JTextField;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @SpringBootApplication
 public class DemoApplication {
@@ -38,6 +41,7 @@ public class DemoApplication {
 		JTextField ano = new JTextField("Ano");
 		JLabel AllStatus = new JLabel("");
 		JLabel AllStatusTres = new JLabel("");
+		JLabel AllStatusQuatro = new JLabel("");
 		JComboBox<String> classifca = new JComboBox<>();
 		classifca.addItem("LIVRE");
 		classifca.addItem("10");
@@ -89,7 +93,8 @@ public class DemoApplication {
 		emailLogin.setBounds(320, 25, 200, 25);
 		senhaLogin.setBounds(320, 50, 200, 25);
 		confirmarLogin.setBounds(320, 75, 200, 25);
-		AllStatusTres.setBounds(320, 100, 200, 25);
+		AllStatusTres.setBounds(320, 100, 250, 25);
+		AllStatusQuatro.setBounds(320, 125, 250, 25);
 		confirmarLogin.setForeground(Color.white);
 		confirmarLogin.setBackground(Color.green);
 
@@ -118,6 +123,7 @@ public class DemoApplication {
 		login.add(confirmarUser);
 		login.add(atualizarSenha);
 		login.add(AllStatusDois);
+		login.add(AllStatusQuatro);
 		ListaDeGenerosDeGame.addActionListener(e -> {
 			selectedOption = (String) ListaDeGenerosDeGame.getSelectedItem();
 			System.out.println("Selected: " + selectedOption);
@@ -127,14 +133,14 @@ public class DemoApplication {
 			selectedOption2 = (String) classifca.getSelectedItem();
 			System.out.println("Selected: " + selectedOption2);
 		});
-		// X
+		
 		painel.setSize(1280, 1280);
 		login.setSize(1280, 1280);
 		confirmarLogin.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
 
-				if (emailLogin.getText().equals("Email") && senhaLogin.getText().equals("Senha")) {
-					AllStatusTres.setText("Dados invalidos.");
+				if (emailLogin.getText().equals("Email") || senhaLogin.getText().equals("Senha")) {
+					AllStatusTres.setText("Dados inválidos.");
 				} else {
 					try {
 
@@ -151,18 +157,13 @@ public class DemoApplication {
 								.build();
 
 						HttpResponse<String> resp = client.send(request, BodyHandlers.ofString());
-
-						System.out.println(resp.body());
+						
 						System.out.println(resp.statusCode());
+						
 						if (resp.statusCode() == 200) {
-							/*
-							 * if (resp.body() != null) {
-							 * AllStatusTres.setText("Usuário não encontrado!");
-							 * AllStatusTres.setForeground(Color.red);
-							 * }
-							 */
-							if (resp.body().startsWith("S")) {
-
+							
+								AllStatusTres.setText("");
+								AllStatusQuatro.setText("");
 								login.dispose();
 								painel.setLayout(null);
 								painel.setVisible(true);
@@ -178,17 +179,35 @@ public class DemoApplication {
 								painel.add(buscar);
 								painel.add(logout);
 
-							} else {
-								AllStatusTres.setText("Usuário não encontrado!");
-								AllStatusTres.setForeground(Color.red);
+							
+						} else if(resp.statusCode() == 400) {
+							String jsonx = resp.body();
+							ObjectMapper mapper = new ObjectMapper();
+							Map<String, String> erros = mapper.readValue(jsonx, Map.class);
+						
+							for (Map.Entry<String, String> entry : erros.entrySet()) {
+									System.out.println(entry.getKey() + ": " + entry.getValue());
+								
+									if(entry.getKey().toString().equals("email")){
+										AllStatusTres.setText(entry.getValue().toString());
+										AllStatusTres.setForeground(Color.red);
+									}
+									if(entry.getKey().toString().equals("senha")){
+										AllStatusQuatro.setText(entry.getValue().toString());
+										AllStatusQuatro.setForeground(Color.red);
+									}
 							}
-						} else {
-							AllStatusTres.setText("Usuário não encontrado!");
+							
+							
+						} else if(resp.statusCode() == 401){
+							AllStatusTres.setText("Usuário inexistente ou senha inválida!");
 							AllStatusTres.setForeground(Color.red);
+							AllStatusQuatro.setText("");
+							
 						}
 
 					} catch (Exception e) {
-
+						
 						e.printStackTrace();
 					}
 
@@ -198,40 +217,40 @@ public class DemoApplication {
 		});
 		logout.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
-				try{
+				try {
 					String json = String.format(
-								"{\"email\":\"%s\",\"senha\":\"%s\"}",
-								emailLogin.getText(),
-								senhaLogin.getText().toString());
+							"{\"email\":\"%s\",\"senha\":\"%s\"}",
+							emailLogin.getText(),
+							senhaLogin.getText().toString());
 
-						HttpClient client = HttpClient.newHttpClient();
-						HttpRequest request = HttpRequest.newBuilder()
-								.uri(URI.create("http://localhost:8000/auth/logout"))
-								.header("Content-Type", "application/json")
-								.POST(HttpRequest.BodyPublishers.ofString(json))
-								.build();
+					HttpClient client = HttpClient.newHttpClient();
+					HttpRequest request = HttpRequest.newBuilder()
+							.uri(URI.create("http://localhost:8000/auth/logout"))
+							.header("Content-Type", "application/json")
+							.POST(HttpRequest.BodyPublishers.ofString(json))
+							.build();
 
-						HttpResponse<String> resp = client.send(request, BodyHandlers.ofString());
+					HttpResponse<String> resp = client.send(request, BodyHandlers.ofString());
 
-						System.out.println(resp.body());
-						System.out.println(resp.statusCode());
-						painel.dispose();
-						login.setVisible(true);
-						login.setLayout(null);
-						login.add(emailLogin);
-						login.add(senhaLogin);
-						login.add(AllStatusTres);
-						login.add(confirmarLogin);
-						login.add(nome);
-						login.add(email);
-						login.add(senha);
-						login.add(confirmarUser);
-						login.add(atualizarSenha);
-						login.add(AllStatusDois);
-				}catch (Exception e){
+					System.out.println(resp.body());
+					System.out.println(resp.statusCode());
+					painel.dispose();
+					login.setVisible(true);
+					login.setLayout(null);
+					login.add(emailLogin);
+					login.add(senhaLogin);
+					login.add(AllStatusTres);
+					login.add(confirmarLogin);
+					login.add(nome);
+					login.add(email);
+					login.add(senha);
+					login.add(confirmarUser);
+					login.add(atualizarSenha);
+					login.add(AllStatusDois);
+				} catch (Exception e) {
 					e.printStackTrace();
 				}
-				
+
 			}
 		});
 		confirmar.addActionListener(new java.awt.event.ActionListener() {
@@ -252,7 +271,7 @@ public class DemoApplication {
 					} else {
 						try {
 							// URL que será aberta
-
+							//
 							String json = String.format(
 									"{\"titulo\":\"%s\",\"ano\":%s,\"genero\":\"%s\",\"classificacao\":%s}",
 									titulo.getText(),

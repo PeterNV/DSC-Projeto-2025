@@ -3,12 +3,15 @@ package com.example.demo.controlador;
 //import java.io.IOException;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import com.example.demo.model.AuthRequest;
-import com.example.demo.model.UserInfo;
+//import com.example.demo.model.AuthRequest;
+//import com.example.demo.model.UserInfo;
 import com.example.demo.service.AuditService;
 import com.example.demo.service.JwtService;
-import com.example.demo.service.UserInfoService;
+//import com.example.demo.service.UserInfoService;
+
+import jakarta.validation.Valid;
 
 //import jakarta.servlet.ServletException;
 //import jakarta.servlet.http.HttpServletRequest;
@@ -24,86 +27,72 @@ import com.example.demo.model.UsuariosRepo;
 @RestController
 @RequestMapping("/auth")
 public class UsuarioControlador {
+
     @Autowired
     private PasswordEncoder encoder;
+
     @Autowired
     private UsuariosRepo repository;
-    @Autowired
-    private UserInfoService service;
+
+    //@Autowired
+    //private UserInfoService service;
 
     @Autowired
     private JwtService jwtService;
 
     @Autowired
     private AuthenticationManager authenticationManager;
-    
+
     @Autowired
     private AuditService auditService;
 
-    @PostMapping("/addNewUser")
-    public String addNewUser(@RequestBody UserInfo userInfo) {
-        return service.addUser(userInfo);
-    }
-
     @PostMapping("/cadastrarUser")
-    public String cadastrar(@RequestBody Usuarios usuario) {
-        Usuarios usuarioBuscar = repository.findByEmail(usuario.getEmail());
-        if (usuarioBuscar != null) {
-            return "Nn"; // Já existe
-        } else {
-            // ⚠️ Codificar a senha manualmente
-            usuario.setSenha(encoder.encode(usuario.getSenha()));
-            repository.insert(usuario);
-            return "Ss";
+    public ResponseEntity<String> cadastrar(@RequestBody @Valid Usuarios usuario) {
+        if (repository.findByEmail(usuario.getEmail()) != null) {
+            return ResponseEntity.status(409).body("Nn"); // Já existe
         }
+        usuario.setSenha(encoder.encode(usuario.getSenha()));
+        repository.insert(usuario);
+        return ResponseEntity.ok("Ss");
     }
 
     @PutMapping("/atualizarUser")
-    public String atualizar(@RequestBody Usuarios usuario) {
-        Usuarios usuarioBuscar = repository.findByEmail(usuario.getEmail());
-        if (usuarioBuscar != null) {
-            usuarioBuscar.setSenha(encoder.encode(usuario.getSenha()));
-            repository.save(usuarioBuscar);
-            return "Ss"; // Atualizado com sucesso
-        } else {
-            return "Nn"; // Não encontrado
+    public ResponseEntity<String> atualizar(@RequestBody @Valid Usuarios usuario) {
+        Usuarios usuarioExistente = repository.findByEmail(usuario.getEmail());
+        if (usuarioExistente == null) {
+            return ResponseEntity.status(404).body("Nn"); //Não encontrado
         }
+        usuarioExistente.setSenha(encoder.encode(usuario.getSenha()));
+        repository.save(usuarioExistente);
+        return ResponseEntity.ok("Ss");
     }
 
-    /*
-     * @PostMapping("/login")
-     * public String login(@RequestBody LoginDTO loginDTO) {
-     * Usuarios usuario = repository.findByEmail(loginDTO.getEmail());
-     * 
-     * if (usuario != null && usuario.getSenha().equals(loginDTO.getSenha())) {
-     * return "Ss"; // Sucesso
-     * } else {
-     * return "Nn"; // Falha no login
-     * }
-     * }
-     */
     @PostMapping("/logout")
-    public String logout(@RequestBody AuthRequest authRequest) {
-       
-         Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(authRequest.getEmail(), authRequest.getSenha()));
-        if (authentication != null && authentication.isAuthenticated()) {
-            auditService.track("Logout from: User: " + authentication.getName());
+    public ResponseEntity<String> logout(@RequestBody @Valid LoginDTO loginDTO) {
+        Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(loginDTO.getEmail(), loginDTO.getSenha())
+        );
+
+        if (authentication.isAuthenticated()) {
+            auditService.track("Logout from: " + authentication.getName());
         } else {
-            auditService.track("Logout attempt with no authentication  " );
+            auditService.track("Logout attempt with no authentication");
         }
 
-        return "Logout realizado com sucesso.";
+        return ResponseEntity.ok("Logout realizado com sucesso.");
     }
 
     @PostMapping("/generateToken")
-    public String authenticateAndGetToken(@RequestBody AuthRequest authRequest) {
-        Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(authRequest.getEmail(), authRequest.getSenha()));
+    public ResponseEntity<String> authenticateAndGetToken(@RequestBody @Valid LoginDTO loginDTO) {
+        Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(loginDTO.getEmail(), loginDTO.getSenha())
+        );
+
         if (authentication.isAuthenticated()) {
-            return "Ss" + jwtService.generateToken(authRequest.getEmail());
+            String token = jwtService.generateToken(loginDTO.getEmail());
+            return ResponseEntity.ok("Ss" + token);
         } else {
             throw new UsernameNotFoundException("Login inválido!");
-
         }
-
     }
 }
