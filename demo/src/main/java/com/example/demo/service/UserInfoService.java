@@ -20,9 +20,9 @@ public class UserInfoService implements UserDetailsService {
 
         userInfo.setSenha(encoder.encode(userInfo.getSenha()));
         repository.save(userInfo);
-        return "Usuário cadastrado com sucessoasdsad";
+        return "Usuário cadastrado com sucesso";
     }
-//x
+
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         UserInfo user = repository.findByEmail(email);

@@ -34,8 +34,8 @@ public class UsuarioControlador {
     @Autowired
     private UsuariosRepo repository;
 
-    //@Autowired
-    //private UserInfoService service;
+    // @Autowired
+    // private UserInfoService service;
 
     @Autowired
     private JwtService jwtService;
@@ -60,7 +60,7 @@ public class UsuarioControlador {
     public ResponseEntity<String> atualizar(@RequestBody @Valid Usuarios usuario) {
         Usuarios usuarioExistente = repository.findByEmail(usuario.getEmail());
         if (usuarioExistente == null) {
-            return ResponseEntity.status(404).body("Nn"); //Não encontrado
+            return ResponseEntity.status(400).body("Nn"); // Não encontrado
         }
         usuarioExistente.setSenha(encoder.encode(usuario.getSenha()));
         repository.save(usuarioExistente);
@@ -70,8 +70,7 @@ public class UsuarioControlador {
     @PostMapping("/logout")
     public ResponseEntity<String> logout(@RequestBody @Valid LoginDTO loginDTO) {
         Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(loginDTO.getEmail(), loginDTO.getSenha())
-        );
+                new UsernamePasswordAuthenticationToken(loginDTO.getEmail(), loginDTO.getSenha()));
 
         if (authentication.isAuthenticated()) {
             auditService.track("Logout from: " + authentication.getName());
@@ -82,11 +81,11 @@ public class UsuarioControlador {
         return ResponseEntity.ok("Logout realizado com sucesso.");
     }
 
+    // x
     @PostMapping("/generateToken")
     public ResponseEntity<String> authenticateAndGetToken(@RequestBody @Valid LoginDTO loginDTO) {
         Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(loginDTO.getEmail(), loginDTO.getSenha())
-        );
+                new UsernamePasswordAuthenticationToken(loginDTO.getEmail(), loginDTO.getSenha()));
 
         if (authentication.isAuthenticated()) {
             String token = jwtService.generateToken(loginDTO.getEmail());
